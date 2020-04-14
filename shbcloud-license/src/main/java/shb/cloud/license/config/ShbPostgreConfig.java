@@ -23,6 +23,8 @@ public class ShbPostgreConfig extends AbstractR2dbcConfiguration {
             .build());
   }
 
+
+
 }
 
 

@@ -4,6 +4,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 
 import java.util.Map;
 import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -18,42 +19,43 @@ import shb.cloud.license.service.ShbLicenseService;
 @Component
 public class ShbLicenseHandler {
 
-  private ShbLicenseService shbLicenseService;
-  public HandlerFunction getLicenses = req -> {
+    private ShbLicenseService shbLicenseService;
 
-    MultiValueMap queryParams = req.queryParams();
-    log.info("### getLicenses");
-    log.info("=> key set ::");
-    queryParams.keySet().stream().forEach(s -> {
-      log.info("{}={}", s, queryParams.get(s));
-    });
+    public HandlerFunction getLicenses = req -> {
 
-    Optional<String> optionalUserId = req.queryParam("userId");
-    String userId = optionalUserId.orElse("sampleUserId");
-    Flux list = (queryParams.isEmpty()) ? shbLicenseService.getLicenses()
-        : shbLicenseService.getLicensesByUserId(userId);
+        log.info(" HandlerFunction = [getLicenses] start");
+        MultiValueMap queryParams = req.queryParams();
 
-    Mono res = ok().body(list, ShbLicense.class);
-    return res;
-  };
+        Flux list;
 
-  public HandlerFunction getLicenseById = req -> {
+        if(queryParams.isEmpty()) {
+            log.info("전체조회 ");
+            list = shbLicenseService.getLicenses();
+        } else {
+            log.info("조건조회 ");
+            list = req.queryParam("userId")
+                    .map(userId -> shbLicenseService.getLicensesByUserId(userId))
+                    .orElse(Flux.empty());
+        }
 
-    log.info("### getLicenseById");
-    Map pathVariables = req.pathVariables();
-    pathVariables.keySet().stream().forEach(s -> {
-      log.info("{}={}", s, pathVariables.get(s));
-    });
-
-    String licenseId = (String) pathVariables.getOrDefault("licenseId", "sampleLicenseId");
-
-    Mono res = ok().body(shbLicenseService.getLicenseById(licenseId), ShbLicense.class);
-    return res;
-  };
+        Mono res = ok().body(list, ShbLicense.class);
+        return res;
+    };
 
 
-  public ShbLicenseHandler(ShbLicenseService shbLicenseService) {
-    this.shbLicenseService = shbLicenseService;
-  }
+    public HandlerFunction getLicenseById = req -> {
 
+        log.info(" HandlerFunction = [getLicenseById] start");
+
+        Map pathVariables = req.pathVariables();
+
+        String licenseId = (String) pathVariables.getOrDefault("licenseId", "sampleLicenseId");
+
+        Mono res = ok().body(shbLicenseService.getLicenseById(licenseId), ShbLicense.class);
+        return res;
+    };
+
+    public ShbLicenseHandler(ShbLicenseService shbLicenseService) {
+        this.shbLicenseService = shbLicenseService;
+    }
 }

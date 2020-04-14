@@ -1,21 +1,15 @@
 package shb.cloud.license.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Data
-@Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("swLicense")
+@Table("sw_license")
+@ToString
 public class ShbLicense {
 
     @Id
@@ -23,4 +17,5 @@ public class ShbLicense {
 
     private String licenseName;
     private String vendorId;
+    private String contractorId;
 }

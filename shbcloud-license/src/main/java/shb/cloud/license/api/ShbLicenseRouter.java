@@ -1,4 +1,4 @@
-package shb.cloud.license.config;
+package shb.cloud.license.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +15,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 
 @Configuration
 @EnableWebFlux
-public class ShbLicenseWebConfig implements WebFluxConfigurer {
+public class ShbLicenseRouter implements WebFluxConfigurer {
 
     @Autowired
     ShbLicenseService shbLicenseService;
