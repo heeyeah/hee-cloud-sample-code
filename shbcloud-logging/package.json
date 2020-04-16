@@ -1,0 +1,15 @@
+{
+  "name": "shbcloud-logging-project",
+  "version": "1.0.0",
+  "description": "sample code logging pod",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.js"
+  },
+  "author": "heeye",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
