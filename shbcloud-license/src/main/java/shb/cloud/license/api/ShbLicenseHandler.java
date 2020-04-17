@@ -3,11 +3,11 @@ package shb.cloud.license.api;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 import java.util.Map;
-import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,9 +34,19 @@ public class ShbLicenseHandler {
         } else {
             log.info("조건조회 ");
             list = req.queryParam("userId")
-                    .map(userId -> shbLicenseService.getLicensesByUserId(userId))
+                    .map(userId -> shbLicenseService.getLicensesByContractorId(userId))
                     .orElse(Flux.empty());
         }
+
+        req.queryParam("userId").map(
+                userId -> {
+
+                    WebClient webClient = WebClient.create();
+
+                    return Mono.empty();
+                }
+        ).orElse(Mono.empty());
+
 
         Mono res = ok().body(list, ShbLicense.class);
         return res;

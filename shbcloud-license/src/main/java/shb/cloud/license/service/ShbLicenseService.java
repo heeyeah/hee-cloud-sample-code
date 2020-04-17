@@ -22,21 +22,12 @@ public class ShbLicenseService {
     private ShbLicenseRepository shbLicenseRepository;
 
     public Flux<ShbLicense> getLicenses() {
-
-        Flux<ShbLicense> list = shbLicenseRepository.findAll();
-
-
-        return list;
+        return shbLicenseRepository.findAll();
     }
 
-    public Flux<ShbLicense> getLicensesByUserId(String userId) {
-
-        log.info("getLicensesByUserId : {}", userId);
-        Flux<ShbLicense> list = shbLicenseRepository.findAllByContractorId(userId);
-
-        return list;
+    public Flux<ShbLicense> getLicensesByContractorId(String contractorId) {
+        return shbLicenseRepository.findAllByContractorId(contractorId);
     }
-
 
     public Mono<ShbLicense> getLicenseById(String licenseId) {
         return shbLicenseRepository.findById(licenseId);
