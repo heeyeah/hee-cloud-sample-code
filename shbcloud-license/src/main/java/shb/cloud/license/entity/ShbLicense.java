@@ -18,4 +18,5 @@ public class ShbLicense {
     private String licenseName;
     private String vendorId;
     private String contractorId;
+
 }

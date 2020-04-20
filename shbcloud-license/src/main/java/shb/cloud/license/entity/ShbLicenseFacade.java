@@ -1,6 +1,6 @@
 package shb.cloud.license.entity;
 
-import jdk.jfr.Description;
+import org.springframework.context.annotation.Description;
 import reactor.core.publisher.Flux;
 
 @Deprecated

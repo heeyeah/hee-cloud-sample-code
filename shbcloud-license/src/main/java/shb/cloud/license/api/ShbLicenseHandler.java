@@ -12,49 +12,38 @@ import org.springframework.web.reactive.function.server.HandlerFunction;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import shb.cloud.license.entity.ShbLicense;
+import shb.cloud.license.entity.ShbTotalEntity;
 import shb.cloud.license.service.ShbLicenseService;
-
 
 @Slf4j
 @Component
 public class ShbLicenseHandler {
 
-    private ShbLicenseService shbLicenseService;
+  private ShbLicenseService shbLicenseService;
 
-    public HandlerFunction getLicenses = req -> {
-
+  public HandlerFunction getLicenses =
+      req -> {
         log.info(" HandlerFunction = [getLicenses] start");
         MultiValueMap queryParams = req.queryParams();
 
         Flux list;
 
-        if(queryParams.isEmpty()) {
-            log.info("전체조회 ");
-            list = shbLicenseService.getLicenses();
+        if (queryParams.isEmpty()) {
+          log.info("전체조회 ");
+          list = shbLicenseService.getLicenses();
+          return ok().body(list, ShbLicense.class);
         } else {
-            log.info("조건조회 ");
-            list = req.queryParam("userId")
-                    .map(userId -> shbLicenseService.getLicensesByContractorId(userId))
-                    .orElse(Flux.empty());
+          log.info("조건조회 ");
+          list =
+              req.queryParam("userId")
+                  .map(userId -> shbLicenseService.getLicensesByContractorId(userId))
+                  .orElse(Flux.empty());
+          return ok().body(list, ShbTotalEntity.class);
         }
+      };
 
-        req.queryParam("userId").map(
-                userId -> {
-
-                    WebClient webClient = WebClient.create();
-
-                    return Mono.empty();
-                }
-        ).orElse(Mono.empty());
-
-
-        Mono res = ok().body(list, ShbLicense.class);
-        return res;
-    };
-
-
-    public HandlerFunction getLicenseById = req -> {
-
+  public HandlerFunction getLicenseById =
+      req -> {
         log.info(" HandlerFunction = [getLicenseById] start");
 
         Map pathVariables = req.pathVariables();
@@ -63,9 +52,9 @@ public class ShbLicenseHandler {
 
         Mono res = ok().body(shbLicenseService.getLicenseById(licenseId), ShbLicense.class);
         return res;
-    };
+      };
 
-    public ShbLicenseHandler(ShbLicenseService shbLicenseService) {
-        this.shbLicenseService = shbLicenseService;
-    }
+  public ShbLicenseHandler(ShbLicenseService shbLicenseService) {
+    this.shbLicenseService = shbLicenseService;
+  }
 }
