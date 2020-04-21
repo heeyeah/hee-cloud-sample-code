@@ -57,30 +57,46 @@ public class ShbLicenseService {
 
     Mono employeeInfo = headersSpec.retrieve().bodyToMono(Map.class);
 
-      Flux<ShbTotalEntity> list = shbLicenseRepository
-              .findAllByContractorId(contractorId)
-              .map(
-                      lf -> {
-                          ShbTotalEntity totalLf = new ShbTotalEntity(lf);
-                          return totalLf;
-                      });
+    log.info(" #1 ");
 
-      employeeInfo.subscribe(
-              employee -> {
-                  ObjectMapper mapper = new ObjectMapper();
-                  Map<String, String> employeeMap = mapper.convertValue(employee, Map.class);
-                  String name = employeeMap.get("employeeName");
-                  String num = employeeMap.get("contactNumber");
+    Flux<ShbTotalEntity> list =
+        shbLicenseRepository
+            .findAllByContractorId(contractorId)
+            .map(
+                lf -> {
+                  log.info(" #2 : {}", lf.toString());
+                  ShbTotalEntity totalLf = new ShbTotalEntity(lf);
+                  return totalLf;
+                });
 
-                  list.map(e -> {
-                      e.setContractorName(name);
-                      e.setContractorContactNumber(num);
-                      return e;
-                  });
+    log.info(" #3 ");
+    employeeInfo.subscribe(
+        employee -> {
+          log.info(" #4 ");
+          ObjectMapper mapper = new ObjectMapper();
+          Map<String, String> employeeMap = mapper.convertValue(employee, Map.class);
+          String name = employeeMap.get("employeeName");
+          String num = employeeMap.get("contactNumber");
+          log.info("name : {} , num : {}", name, num);
+          list.subscribe(
+              e -> {
+                log.info(" #5 ");
+                e.setContractorName(name);
+                e.setContractorContactNumber(num);
+
               });
+        });
+    log.info(" #6 ");
+    return list;
+  }
 
-      return list;
-
+  public void sleep1second() {
+    try {
+      log.info(" ... ");
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      log.error("{}", e);
+    }
   }
 
   public Mono<ShbLicense> getLicenseById(String licenseId) {

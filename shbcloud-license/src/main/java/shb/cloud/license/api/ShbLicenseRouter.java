@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.reactive.config.ResourceHandlerRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -24,7 +25,18 @@ public class ShbLicenseRouter implements WebFluxConfigurer {
     public RouterFunction<ServerResponse> routes() {
 
         ShbLicenseHandler handler = new ShbLicenseHandler(shbLicenseService);
-        return RouterFunctions.route(GET("/licenses"), handler.getLicenses)
-                .andRoute(GET("/licenses/{licenseId}"), handler.getLicenseById);
+        return RouterFunctions
+                .route(GET("/licenses"), handler.getLicenses);
+//                .andRoute(GET("/licenses/{licenseId}"), handler.getLicenseById);
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+
+        registry.addResourceHandler("/swagger-ui.html**")
+                .addResourceLocations("classpath:/META-INF/resources/");
+
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 }

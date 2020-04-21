@@ -4,6 +4,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 
 import java.util.Map;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -21,6 +22,7 @@ public class ShbLicenseHandler {
 
   private ShbLicenseService shbLicenseService;
 
+
   public HandlerFunction getLicenses =
       req -> {
         log.info(" HandlerFunction = [getLicenses] start");
@@ -33,11 +35,15 @@ public class ShbLicenseHandler {
           list = shbLicenseService.getLicenses();
           return ok().body(list, ShbLicense.class);
         } else {
-          log.info("조건조회 ");
+          log.info("▶조건조회 시작");
           list =
               req.queryParam("userId")
-                  .map(userId -> shbLicenseService.getLicensesByContractorId(userId))
+                  .map(userId -> {
+                      log.info("  ▶handler map");
+                      return shbLicenseService.getLicensesByContractorId(userId);
+                  })
                   .orElse(Flux.empty());
+          log.info("▶조건조회 종료");
           return ok().body(list, ShbTotalEntity.class);
         }
       };
