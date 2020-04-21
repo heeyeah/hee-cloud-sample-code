@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -18,10 +20,6 @@ import reactor.netty.tcp.TcpClient;
 import shb.cloud.license.entity.ShbLicense;
 import shb.cloud.license.entity.ShbLicenseRepository;
 import shb.cloud.license.entity.ShbTotalEntity;
-
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Component
@@ -41,16 +39,72 @@ public class ShbLicenseService {
           .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
           .baseUrl("http://localhost:9000")
           .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-          // .defaultUriVariables(Collections.singletonMap("url","http://localhost:9000"))
           .build();
 
   @Autowired private ShbLicenseRepository shbLicenseRepository;
 
+  /**
+   * Another Container Response 값 converted to Map!
+   *
+   * @param obj
+   * @return
+   */
+  public static Map<String, String> convertResToMap(Object obj) {
+    return new ObjectMapper().convertValue(obj, Map.class);
+  }
+
+  /**
+   * R2DBC 사용 (단순조회)
+   *
+   * @return
+   */
   public Flux<ShbLicense> getLicenses() {
     return shbLicenseRepository.findAll();
   }
 
+  /**
+   * R2DBC 사용 + Another Container Call (WebClient 사용)
+   *
+   * @param contractorId
+   * @return
+   */
   public Flux<ShbTotalEntity> getLicensesByContractorId(String contractorId) {
+
+    WebClient.RequestHeadersSpec headersSpec =
+        webClient.get().uri(uriBuilder -> uriBuilder.pathSegment("employee", contractorId).build());
+
+    Mono employeeInfo = headersSpec.retrieve().bodyToMono(Map.class);
+    /* 이건 sync call일 때, async로 만들기 위한 것이라 한다. jdbc sync call과 같은 경우를 말함.
+        Mono.fromCallable(() -> headersSpec.retrieve().bodyToMono(Map.class))
+            .subscribeOn(Schedulers.elastic());
+    */
+
+    log.info(" #1 ");
+
+    Flux<ShbTotalEntity> list =
+        shbLicenseRepository
+            .findAllByContractorId(contractorId)
+            .map(lf -> new ShbTotalEntity(lf))
+            .flatMap(
+                tlf ->
+                    employeeInfo.map(
+                        emply -> {
+                          Map<String, String> map = convertResToMap(emply);
+                          tlf.setContractorName(map.get("employeeName"));
+                          tlf.setContractorContactNumber(map.get("employeeContactNumber"));
+                          return tlf;
+                        }));
+
+    return list;
+  }
+
+  /**
+   * 망한 코드. 이렇게 비동기 개발에 적응하기가 쉽지 않습니다...:p
+   *
+   * @param contractorId
+   * @return
+   */
+  public Flux<ShbTotalEntity> __1_foolishCode(String contractorId) {
 
     WebClient.RequestHeadersSpec headersSpec =
         webClient.get().uri(uriBuilder -> uriBuilder.pathSegment("employee", contractorId).build());
@@ -73,8 +127,7 @@ public class ShbLicenseService {
     employeeInfo.subscribe(
         employee -> {
           log.info(" #4 ");
-          ObjectMapper mapper = new ObjectMapper();
-          Map<String, String> employeeMap = mapper.convertValue(employee, Map.class);
+          Map<String, String> employeeMap = convertResToMap(employee);
           String name = employeeMap.get("employeeName");
           String num = employeeMap.get("contactNumber");
           log.info("name : {} , num : {}", name, num);
@@ -83,20 +136,10 @@ public class ShbLicenseService {
                 log.info(" #5 ");
                 e.setContractorName(name);
                 e.setContractorContactNumber(num);
-
               });
         });
     log.info(" #6 ");
     return list;
-  }
-
-  public void sleep1second() {
-    try {
-      log.info(" ... ");
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      log.error("{}", e);
-    }
   }
 
   public Mono<ShbLicense> getLicenseById(String licenseId) {
