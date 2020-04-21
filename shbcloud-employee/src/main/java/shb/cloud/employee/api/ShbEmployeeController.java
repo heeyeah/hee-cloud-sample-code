@@ -18,11 +18,8 @@ public class ShbEmployeeController {
 
   @GetMapping("/employee/{employeeId}")
   public Mono<ShbEmployee> getEmployeeById(@PathVariable String employeeId) {
-
     log.info("getEmployeeById : {}", employeeId);
-
     Mono<ShbEmployee> employeeInfo = this.shbEmployeeRepository.findById(employeeId);
-
     return employeeInfo;
   }
 }
