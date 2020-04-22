@@ -1,2 +1,5 @@
 server:
   port: 8000
+base:
+  url:
+    employee: http://localhost:9000

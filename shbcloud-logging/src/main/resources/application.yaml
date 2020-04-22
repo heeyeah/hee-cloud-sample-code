@@ -1,0 +1,11 @@
+server:
+  port: 7000
+
+spring:
+  data:
+    mongodb:
+      database: dblog
+      username: heeyah
+      password: pass
+      host: 52.231.50.61
+      port: 27017
