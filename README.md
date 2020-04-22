@@ -3,10 +3,7 @@
 Sample code for Microservice architecture study in Cloud Unit
 
 ⇒  project list
-- [shbcloud-license](#shbcloud-license)
-- shbcloud-employee
+- [shbcloud-license](https://github.com/heeyeah/hee-cloud-sample-code/tree/master/shbcloud-license)
+- [shbcloud-employee](https://github.com/heeyeah/hee-cloud-sample-code/tree/master/shbcloud-employee)
 - shbcloud-logging
 
-
-## shbcloud-license
-License 관련 어플리케이션
