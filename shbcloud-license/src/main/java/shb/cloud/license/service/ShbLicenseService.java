@@ -34,7 +34,7 @@ public class ShbLicenseService {
                 connection.addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS));
               });
 
-  static WebClient webClient =
+  public static WebClient webClient =
       WebClient.builder()
           .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
           .baseUrl("http://localhost:9000")
